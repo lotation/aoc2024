@@ -1,0 +1,151 @@
+package main
+
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	var inputfile string
+	flag.StringVar(&inputfile, "input", "input.txt", "path to file containing current day input")
+	flag.Parse()
+
+	// Open input file
+	fp, err := os.Open(inputfile)
+	if err != nil {
+		log.Fatalf("Error opening input file %s: %v", inputfile, err)
+		return
+	}
+	defer func() {
+		if err := fp.Close(); err != nil {
+			log.Panic(err)
+		}
+	}()
+
+	// Report represent a file line
+	var report []int
+	// Safe reports
+	var safeReports int = 0
+
+	// Parse inut file
+	scanner := bufio.NewScanner(fp)
+	for scanner.Scan() {
+		report = nil
+		line := scanner.Text()
+		fields := strings.Fields(line)
+
+		for _, f := range fields {
+			report = append(report, toInt(f))
+		}
+
+		// Check for report safety
+		if isSafe(report) {
+			safeReports++
+		}
+	}
+
+	// Print result
+	fmt.Printf("Total safe reports: %d\n", safeReports)
+}
+
+func isSafe(report []int) bool {
+	var maxIncr int = 1
+	var maxDecr int = 1
+
+	fmt.Print("Working with report ")
+	fmt.Println(report)
+
+	// Check if ascending
+	for n := 0; n < len(report)-1; {
+		inc := 1
+		found := false // Flag to check if a valid increment was found
+		for inc <= maxIncr {
+			fmt.Printf("%d) Checking asc %d + %d == %d ?", n, report[n], inc, report[n+1])
+			if report[n]+inc == report[n+1] {
+				fmt.Println("  => yes")
+				maxIncr++
+				n++
+				found = true // Set flag to indicate a valid increment was found
+				break
+			} else {
+				fmt.Println("  => no")
+				inc++
+				// fmt.Printf("inc %d  -  maxIncr %d\n", inc, maxIncr)
+				// break
+				// goto end_asc
+			}
+		}
+		if !found {
+			// If no valid increment was found, break out of the outer loop
+			break
+		}
+	}
+
+	// end_asc:
+	// Check if descending
+	for n := 0; n < len(report)-1; {
+		dec := 1
+		found := false // Flag to check if a valid increment was found
+		for dec <= maxDecr {
+			fmt.Printf("%d) Checking desc %d - %d == %d ?", n, report[n], dec, report[n+1])
+			if report[n]-dec == report[n+1] {
+				fmt.Println("  => yes")
+				maxDecr++
+				n++
+				found = true // Set flag to indicate a valid decrement was found
+				break
+			} else {
+				fmt.Println("  => no")
+				dec++
+				// fmt.Printf("dec %d  -  maxDecr %d\n", dec, maxDecr)
+				// break
+				// goto end_desc
+			}
+		}
+		if !found {
+			// If no valid increment was found, break out of the outer loop
+			break
+		}
+	}
+
+	// for n := 0; n < len(report)-1; {
+	// 	found := false
+	// 	for dec := 1; dec <= maxDecr; dec++ {
+	// 		fmt.Printf("%d) Checking desc %d - %d == %d ?", n, report[n], dec, report[n+1])
+	// 		if report[n]-dec == report[n+1] {
+	// 			fmt.Println("  => yes")
+	// 			maxDecr++
+	// 			n++
+	// 			found = true
+	// 			break
+	// 		} else {
+	// 			fmt.Printf(" dec %d => no\n", dec)
+	// 			// break
+	// 			// goto end_desc
+	// 		}
+	// 	}
+
+	// }
+
+	// end_desc:
+	fmt.Println()
+
+	// Check if descending
+	// da dec a 1 (all'inizio 1, poi 2, poi 3 ma puo' tornare 1)
+	//...
+
+	return true
+}
+
+func toInt(val string) int {
+	num, err := strconv.ParseInt(val, 10, 0)
+	if err != nil {
+		log.Fatalf("Error converting value %s to uint32: %v.", val, err)
+	}
+	return int(num)
+}
