@@ -48,9 +48,10 @@ func main() {
 			safeReports++
 		} else {
 			// try to remove one bad level at a time
-			for _, e := range report {
-				report = remove(report, e)
-				if isSafe(report) {
+			for e := 0; e < len(report); e++ {
+				tmpreport := remove(report, e)
+				// fmt.Printf("Retrying report %v without element %d\n", report, report[e])
+				if isSafe(tmpreport) {
 					safeReports++
 					break
 				}
@@ -67,36 +68,31 @@ func isSafe(report []int) bool {
 	maxDecr := 3
 	found := false
 
-	fmt.Print("Working with report ")
-	fmt.Println(report)
+	// fmt.Printf("Working with report %v\n", report)
 
 	// Check if ascending
 	for n := 0; n < len(report)-1; {
 		found = false // Flag to check if a valid increment was found
 		for inc := 1; inc <= maxIncr; {
-			fmt.Printf("%d) Checking asc %d + %d == %d ?", n, report[n], inc, report[n+1])
+			// fmt.Printf("%d) Checking asc %d + %d == %d ?", n, report[n], inc, report[n+1])
 			if report[n]+inc == report[n+1] {
 				n++
 				found = true // valid increment
-				fmt.Println("  => yes")
+				// fmt.Println("  => yes")
 				break
 			} else {
 				inc++
-				fmt.Println("  => no")
+				// fmt.Println("  => no")
 			}
 		}
 		if !found {
 			// no valid increment was found
-			// and more than 1 bad level,
-			// break out of the outer loop
 			break
 		}
 	}
 
 	if found {
-		fmt.Print("=> Report ")
-		fmt.Print(report)
-		fmt.Printf(" is safe\n\n")
+		// fmt.Printf("=> Report %v is safe\n\n", report)
 		return true
 	}
 
@@ -104,41 +100,41 @@ func isSafe(report []int) bool {
 	for n := 0; n < len(report)-1; {
 		found = false // flag to check if a valid increment was found
 		for dec := 1; dec <= maxDecr; {
-			fmt.Printf("%d) Checking desc %d - %d == %d ?", n, report[n], dec, report[n+1])
+			// fmt.Printf("%d) Checking desc %d - %d == %d ?", n, report[n], dec, report[n+1])
 			if report[n]-dec == report[n+1] {
 				n++
 				found = true // valid decrement
-				fmt.Println("  => yes")
+				// fmt.Println("  => yes")
 				break
 			} else {
 				dec++
-				fmt.Println("  => no")
+				// fmt.Println("  => no")
 			}
 		}
 		if !found {
 			// no valid increment was found
-			// and more than 1 bad level,
-			// break out of the outer loop
 			break
 		}
 	}
 
 	if found {
-		fmt.Print("=> Report ")
-		fmt.Print(report)
-		fmt.Printf(" is safe\n\n")
+		// fmt.Printf("=> Report %v is safe\n\n", report)
 		return true
 	}
 
-	fmt.Print("=> Report ")
-	fmt.Print(report)
-	fmt.Printf(" is NOT safe\n\n")
+	// fmt.Printf("=> Report %v is NOT safe\n\n", report)
 	return false
 }
 
-// controllo out of bounds index
-func removeIndex(slice []int, index int) []int {
-	return append(slice[:index], slice[index+1:]...)
+// remove element in slice with index performing bound checking
+func remove(slice []int, index int) []int {
+	if index >= 0 && index < len(slice) {
+		ret := make([]int, 0, len(slice)-1)
+		ret = append(ret, slice[:index]...)
+		return append(ret, slice[index+1:]...)
+	} else {
+		return slice
+	}
 }
 
 func toInt(val string) int {
