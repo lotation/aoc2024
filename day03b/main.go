@@ -27,21 +27,36 @@ func main() {
 		}
 	}()
 
-	// Result of all mul instructions
-	var res int = 0
-	mulRE := `mul\((\d{1,3}),(\d{1,3})\)`
-	doRE := `do\(\)`
-	dontRE := `don't\(\)`
+	var input string
 
 	// Parse inut file
 	scanner := bufio.NewScanner(fp)
 	for scanner.Scan() {
 		line := scanner.Text()
-		re := regexp.MustCompile()
-		results := re.FindAllStringSubmatch(line, -1)
-		for _, elem := range results {
-			//fmt.Printf("%v\n", elem[1:])
-			res += mul(elem[1:])
+		input += line // idk why I need to join everything in one string
+	}
+
+	// Result of all mul instructions
+	var res int = 0
+
+	re := regexp.MustCompile(`mul\([\d]{1,3},[\d]{1,3}\)|don't\(\)|do\(\)`)
+	results := re.FindAllStringSubmatch(input, -1)
+
+	var dont bool = false // reset dont flag before each iteration
+
+	for _, elem := range results {
+		if elem[0] == `don't()` {
+			dont = true
+		} else if elem[0] == `do()` {
+			dont = false
+			continue
+		}
+
+		if !dont {
+			re = regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
+			numbers := re.FindStringSubmatch(elem[0])
+			res += mul(numbers[1:])
+			//fmt.Printf("%#v [%d]\n", numbers, res)
 		}
 	}
 
