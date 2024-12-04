@@ -41,55 +41,175 @@ func main() {
 		return
 	}
 
+	// Slice of functions with all the different checks
+	checks := []func(string, []string, int, int) bool{
+		checkRight,
+		checkLeft,
+		checkDown,
+		checkUp,
+		checkRightDown,
+		checkRightUp,
+		checkLeftDown,
+		checkLeftUp,
+	}
+
+	// Result
+	var count int = 0
+
 	// Start looking for word XMAS
-	for i, row := range table {
-		for j, char := range row {
+	for i := 0; i < len(table); i++ {
+		for j := 0; j < len(table[i]); j++ {
 			//fmt.Printf("%c ", table[i][j])
 
-			// check if start of word
-			if char == word[0] { // X
-				checkHorizontalForward(table, i, j)
-				checkHorizontalBackward(table, i, j)
-				checkVericalForward(table, i, j)
-				checkVerticalBackward(table, i, j)
-				checkDiagonalForward(table, i, j)
-				checkDiagonalForward(table, i, j)
+			// Check if start of the word
+			if table[i][j] == 'X' { // word[0]
+				// Try all checks
+				for _, check := range checks {
+					if check(word, table, i, j) {
+						count++ // word found in table
+					}
+				}
+				fmt.Println()
 			}
 		}
 		//fmt.Println()
 	}
-	fmt.Println()
-
-	// Result
-	var res int = 0
+	// fmt.Println()
 
 	// Print result
-	fmt.Printf("Result: %d\n", res)
+	fmt.Printf("Result: %d\n", count)
 }
 
-func checkHorizontalForward(table []string, i int, j int) bool {
-	// if table[i][j:j+4] == []rune(word) {
-	// 	return true
+func checkRight(word string, table []string, i int, j int) bool {
+	if i < 0 || i >= len(table) || j < 0 || j+len(word) > len(table[i]) {
+		return false
+	}
+	s := table[i][j : j+len(word)]
+	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Horizontal-Forward", i, j, s, s == word)
+	return s == word
+}
+
+func checkLeft(word string, table []string, i int, j int) bool {
+	if i < 0 || i >= len(table) || j < len(word)-1 || j >= len(table[i]) {
+		return false
+	}
+	s := table[i][j-len(word)+1 : j+1]
+	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Horizontal-Backward", i, j, s, s == rev(word))
+	return s == rev(word)
+}
+
+func checkDown(word string, table []string, i int, j int) bool {
+	if j < 0 || j >= len(table[0]) || i < 0 || i+len(word) > len(table) {
+		return false
+	}
+	s := downSubstring(table, i, j) // table[i : i+len(word)][j]
+	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Vertical-Forward", i, j, s, s == word)
+	return s == word
+}
+
+func checkUp(word string, table []string, i int, j int) bool {
+	if j < 0 || j >= len(table[0]) || i < len(word)-1 || i >= len(table) {
+		return false
+	}
+	s := upSubstring(table, i, j) // table[i-len(word)+1 : i][j]
+	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Verical-Backward", i, j, s, s == word)
+	return s == word
+}
+
+func checkRightDown(word string, table []string, i int, j int) bool {
+	if i < 0 || i >= len(table) || j < 0 || j >= len(table[0]) {
+		return false
+	}
+	s := rightDownSubstring(table, i, j) // table[i : i+len(word)][j : j+len(word)]
+	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Diagonal-Forward", i, j, s, s == word)
+	return s == word
+}
+
+// TODO
+// write similar to checkRightDown
+func checkRightUp(word string, table []string, i int, j int) bool {
+	return false
+}
+
+// TODO
+// write similar to checkRightDown
+func checkLeftDown(word string, table []string, i int, j int) bool {
+	return false
+}
+
+func checkLeftUp(word string, table []string, i int, j int) bool {
+	if i < 0 || i >= len(table) || j < 0 || j >= len(table[0]) {
+		return false
+	}
+	s := leftUpSubstring(table, i, j) // table[i-len(word)+1 : i][j-len(word)+1 : j]
+	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Diagonal-Backward", i, j, s, s == word)
+	return s == word
+}
+
+func rev(str string) string {
+	runes := []rune(str)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
+}
+
+func downSubstring(table []string, i, j int) string {
+	var result []rune
+	for ; i < len(word); i++ {
+		result = append(result, rune(table[i][j]))
+	}
+	return string(result)
+}
+
+func upSubstring(table []string, i, j int) string {
+	var result []rune
+	for ; i >= 0; i-- {
+		result = append(result, rune(table[i][j]))
+	}
+	return string(result)
+}
+
+func rightDownSubstring(table []string, i, j int) string {
+	// var result []rune
+	// for i < len(table) && j < len(table[0]) {
+	// 	result = append(result, rune(table[i][j]))
+	// 	i++
+	// 	j++
 	// }
-	return false
+	// return string(result)
+	var result []rune
+	for k := 0; k < len(word); k++ {
+		if i < len(table) && j < len(table[0]) {
+			result = append(result, rune(table[i][j]))
+			i++
+			j++
+		}
+	}
+	return string(result)
 }
 
-func checkHorizontalBackward(table []string, i int, j int) bool {
-	return false
+// TODO
+// write similar to rightDownSubstring
+func rightUpSubstring(table []string, i, j int) string {
+	return ""
 }
 
-func checkVericalForward(table []string, i int, j int) bool {
-	return false
+// TODO
+// write similar to rightDownSubstring
+func leftDownSubstring(table []string, i, j int) string {
+	return ""
 }
 
-func checkVerticalBackward(table []string, i int, j int) bool {
-	return false
-}
-
-func checkDiagonalForward(table []string, i int, j int) bool {
-	return false
-}
-
-func checkDiagonalBackward(table []string, i int, j int) bool {
-	return false
+// TODO
+// write similar to rightDownSubstring
+func leftUpSubstring(table []string, i, j int) string {
+	// var result []rune
+	// for i >= 0 && j >= 0 {
+	// 	result = append(result, rune(table[i][j]))
+	// 	i--
+	// 	j--
+	// }
+	// return string(result)
+	return ""
 }
