@@ -1,1 +1,5 @@
+# used to explicitly show binaries
 **/*.elf
+
+# used for notes or old code
+**/.lol.txt
