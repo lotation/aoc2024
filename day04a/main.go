@@ -10,9 +10,12 @@ import (
 
 const word string = "XMAS"
 
+var verbose = true
+
 func main() {
 	var inputfile string
 	flag.StringVar(&inputfile, "input", "input.txt", "path to file containing current day input")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	flag.Parse()
 
 	// Open input file
@@ -84,8 +87,8 @@ func checkRight(word string, table []string, i int, j int) bool {
 	if i < 0 || i >= len(table) || j < 0 || j+len(word) > len(table[i]) {
 		return false
 	}
-	s := table[i][j : j+len(word)]
-	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Horizontal-Forward", i, j, s, s == word)
+	s := rightSubstring(table, i, j) // table[i][j : j+len(word)]
+	logAction("Right", i, j, s, s == word)
 	return s == word
 }
 
@@ -93,79 +96,113 @@ func checkLeft(word string, table []string, i int, j int) bool {
 	if i < 0 || i >= len(table) || j < len(word)-1 || j >= len(table[i]) {
 		return false
 	}
-	s := table[i][j-len(word)+1 : j+1]
-	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Horizontal-Backward", i, j, s, s == rev(word))
-	return s == rev(word)
+	s := leftSubstring(table, i, j) // table[i][j-len(word)+1 : j+1]
+	logAction("Left", i, j, s, s == word)
+	return s == word //rev(word)
 }
 
 func checkDown(word string, table []string, i int, j int) bool {
-	if j < 0 || j >= len(table[0]) || i < 0 || i+len(word) > len(table) {
+	if i < 0 || i+len(word) > len(table) || j < 0 || j >= len(table[i]) {
 		return false
 	}
 	s := downSubstring(table, i, j) // table[i : i+len(word)][j]
-	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Vertical-Forward", i, j, s, s == word)
+	logAction("Down", i, j, s, s == word)
 	return s == word
 }
 
 func checkUp(word string, table []string, i int, j int) bool {
-	if j < 0 || j >= len(table[0]) || i < len(word)-1 || i >= len(table) {
+	if i < len(word)-1 || i >= len(table) || j < 0 || j >= len(table[i]) {
 		return false
 	}
 	s := upSubstring(table, i, j) // table[i-len(word)+1 : i][j]
-	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Verical-Backward", i, j, s, s == word)
+	logAction("Up", i, j, s, s == word)
 	return s == word
 }
 
 func checkRightDown(word string, table []string, i int, j int) bool {
-	if i < 0 || i >= len(table) || j < 0 || j >= len(table[0]) {
+	if i < 0 || i+len(word) >= len(table) || j < 0 || j+len(word) >= len(table[i]) {
 		return false
 	}
 	s := rightDownSubstring(table, i, j) // table[i : i+len(word)][j : j+len(word)]
-	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Diagonal-Forward", i, j, s, s == word)
+	logAction("Right-Down", i, j, s, s == word)
 	return s == word
 }
 
-// TODO
-// write similar to checkRightDown
 func checkRightUp(word string, table []string, i int, j int) bool {
-	return false
+	if i < len(word)-1 || i >= len(table) || j < 0 || j+len(word) >= len(table[i]) {
+		return false
+	}
+	s := rightUpSubstring(table, i, j) // table[i-len(word)+1 : i][j : j+len(word)]
+	logAction("Right-Up", i, j, s, s == word)
+	return s == word
 }
 
-// TODO
-// write similar to checkRightDown
 func checkLeftDown(word string, table []string, i int, j int) bool {
-	return false
+	if i < 0 || i+len(word) >= len(table) || j < len(word)-1 || j >= len(table[i]) {
+		return false
+	}
+	s := leftDownSubstring(table, i, j) // table[i : i+len(word)][j-len(word)+1 : j]
+	logAction("Left-Down", i, j, s, s == word)
+	return s == word
 }
 
 func checkLeftUp(word string, table []string, i int, j int) bool {
-	if i < 0 || i >= len(table) || j < 0 || j >= len(table[0]) {
+	if i < len(word)-1 || i >= len(table) || j < len(word)-1 || j >= len(table[i]) {
 		return false
 	}
 	s := leftUpSubstring(table, i, j) // table[i-len(word)+1 : i][j-len(word)+1 : j]
-	fmt.Printf("%s [%d,%d] %s  {%t}\n", "Diagonal-Backward", i, j, s, s == word)
+	logAction("Left-Up", i, j, s, s == word)
 	return s == word
 }
 
-func rev(str string) string {
-	runes := []rune(str)
-	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
-		runes[i], runes[j] = runes[j], runes[i]
+// func rev(str string) string {
+// 	runes := []rune(str)
+// 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+// 		runes[i], runes[j] = runes[j], runes[i]
+// 	}
+// 	return string(runes)
+// }
+
+func rightSubstring(table []string, i, j int) string {
+	var result []rune
+	for k := 0; k < len(word); k++ {
+		if j < len(table[i]) {
+			result = append(result, rune(table[i][j]))
+			j++
+		}
 	}
-	return string(runes)
+	return string(result)
+}
+
+func leftSubstring(table []string, i, j int) string {
+	var result []rune
+	for k := 0; k < len(word); k++ {
+		if j >= 0 {
+			result = append(result, rune(table[i][j]))
+			j--
+		}
+	}
+	return string(result)
 }
 
 func downSubstring(table []string, i, j int) string {
 	var result []rune
-	for ; i < len(word); i++ {
-		result = append(result, rune(table[i][j]))
+	for k := 0; k < len(word); k++ {
+		if i < len(table) {
+			result = append(result, rune(table[i][j]))
+			i++
+		}
 	}
 	return string(result)
 }
 
 func upSubstring(table []string, i, j int) string {
 	var result []rune
-	for ; i >= 0; i-- {
-		result = append(result, rune(table[i][j]))
+	for k := 0; k < len(word); k++ {
+		if i >= 0 {
+			result = append(result, rune(table[i][j]))
+			i--
+		}
 	}
 	return string(result)
 }
@@ -189,20 +226,30 @@ func rightDownSubstring(table []string, i, j int) string {
 	return string(result)
 }
 
-// TODO
-// write similar to rightDownSubstring
 func rightUpSubstring(table []string, i, j int) string {
-	return ""
+	var result []rune
+	for k := 0; k < len(word); k++ {
+		if i >= 0 && j < len(table[0]) {
+			result = append(result, rune(table[i][j]))
+			i--
+			j++
+		}
+	}
+	return string(result)
 }
 
-// TODO
-// write similar to rightDownSubstring
 func leftDownSubstring(table []string, i, j int) string {
-	return ""
+	var result []rune
+	for k := 0; k < len(word); k++ {
+		if i < len(table) && j >= 0 {
+			result = append(result, rune(table[i][j]))
+			i++
+			j--
+		}
+	}
+	return string(result)
 }
 
-// TODO
-// write similar to rightDownSubstring
 func leftUpSubstring(table []string, i, j int) string {
 	// var result []rune
 	// for i >= 0 && j >= 0 {
@@ -211,5 +258,19 @@ func leftUpSubstring(table []string, i, j int) string {
 	// 	j--
 	// }
 	// return string(result)
-	return ""
+	var result []rune
+	for k := 0; k < len(word); k++ {
+		if i >= 0 && j >= 0 {
+			result = append(result, rune(table[i][j]))
+			i--
+			j--
+		}
+	}
+	return string(result)
+}
+
+func logAction(action string, i, j int, substr string, cond bool) {
+	if verbose {
+		fmt.Printf("[%d,%d] %-10s  %s  {%t}\n", i, j, action, substr, cond)
+	}
 }
