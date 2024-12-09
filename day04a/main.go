@@ -72,7 +72,9 @@ func main() {
 						count++ // word found in table
 					}
 				}
-				fmt.Println()
+				if verbose {
+					fmt.Println()
+				}
 			}
 		}
 		//fmt.Println()
