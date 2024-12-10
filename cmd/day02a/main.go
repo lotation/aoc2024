@@ -5,22 +5,27 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 	"strings"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
+
+var verbose bool = true
+
+func vPrint(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
 
 func main() {
 	var inputfile string
 	flag.StringVar(&inputfile, "input", "input.txt", "path to file containing current day input")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -40,7 +45,7 @@ func main() {
 		fields := strings.Fields(line)
 
 		for _, f := range fields {
-			report = append(report, toInt(f))
+			report = append(report, utils.ToInt(f))
 		}
 
 		// Check for report safety
@@ -98,17 +103,5 @@ func isSafe(report []int) bool {
 		}
 	}
 
-	if found {
-		return true
-	}
-
-	return false
-}
-
-func toInt(val string) int {
-	num, err := strconv.ParseInt(val, 10, 0)
-	if err != nil {
-		log.Fatalf("Error converting value %s to uint32: %v.", val, err)
-	}
-	return int(num)
+	return found
 }

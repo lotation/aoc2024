@@ -5,22 +5,28 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"strconv"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
+
+var verbose bool = true
+
+func vPrint(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
 
 func main() {
 	var inputfile string
 	flag.StringVar(&inputfile, "input", "input.txt", "path to file containing current day input")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -56,7 +62,7 @@ func main() {
 			re = regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
 			numbers := re.FindStringSubmatch(elem[0])
 			res += mul(numbers[1:])
-			//fmt.Printf("%#v [%d]\n", numbers, res)
+			vPrint("%#v [%d]\n", numbers, res)
 		}
 	}
 

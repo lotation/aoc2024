@@ -5,22 +5,27 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 	"strings"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
+
+var verbose bool = true
+
+func vPrint(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
 
 func main() {
 	var inputfile string
 	flag.StringVar(&inputfile, "input", "input.txt", "path to file containing current day input")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -40,7 +45,7 @@ func main() {
 		fields := strings.Fields(line)
 
 		for _, f := range fields {
-			report = append(report, toInt(f))
+			report = append(report, utils.ToInt(f))
 		}
 
 		// Check for report safety
@@ -50,7 +55,7 @@ func main() {
 			// try to remove one bad level at a time
 			for e := 0; e < len(report); e++ {
 				tmpreport := remove(report, e)
-				// fmt.Printf("Retrying report %v without element %d\n", report, report[e])
+				vPrint("Retrying report %v without element %d\n", report, report[e])
 				if isSafe(tmpreport) {
 					safeReports++
 					break
@@ -68,21 +73,21 @@ func isSafe(report []int) bool {
 	maxDecr := 3
 	found := false
 
-	// fmt.Printf("Working with report %v\n", report)
+	vPrint("Working with report %v\n", report)
 
 	// Check if ascending
 	for n := 0; n < len(report)-1; {
 		found = false // Flag to check if a valid increment was found
 		for inc := 1; inc <= maxIncr; {
-			// fmt.Printf("%d) Checking asc %d + %d == %d ?", n, report[n], inc, report[n+1])
+			vPrint("%d) Checking asc %d + %d == %d ?", n, report[n], inc, report[n+1])
 			if report[n]+inc == report[n+1] {
 				n++
 				found = true // valid increment
-				// fmt.Println("  => yes")
+				vPrint("  => yes")
 				break
 			} else {
 				inc++
-				// fmt.Println("  => no")
+				vPrint("  => no")
 			}
 		}
 		if !found {
@@ -92,7 +97,7 @@ func isSafe(report []int) bool {
 	}
 
 	if found {
-		// fmt.Printf("=> Report %v is safe\n\n", report)
+		vPrint("=> Report %v is safe\n\n", report)
 		return true
 	}
 
@@ -100,15 +105,15 @@ func isSafe(report []int) bool {
 	for n := 0; n < len(report)-1; {
 		found = false // flag to check if a valid increment was found
 		for dec := 1; dec <= maxDecr; {
-			// fmt.Printf("%d) Checking desc %d - %d == %d ?", n, report[n], dec, report[n+1])
+			vPrint("%d) Checking desc %d - %d == %d ?", n, report[n], dec, report[n+1])
 			if report[n]-dec == report[n+1] {
 				n++
 				found = true // valid decrement
-				// fmt.Println("  => yes")
+				vPrint("  => yes")
 				break
 			} else {
 				dec++
-				// fmt.Println("  => no")
+				vPrint("  => no")
 			}
 		}
 		if !found {
@@ -118,11 +123,11 @@ func isSafe(report []int) bool {
 	}
 
 	if found {
-		// fmt.Printf("=> Report %v is safe\n\n", report)
+		vPrint("=> Report %v is safe\n\n", report)
 		return true
 	}
 
-	// fmt.Printf("=> Report %v is NOT safe\n\n", report)
+	vPrint("=> Report %v is NOT safe\n\n", report)
 	return false
 }
 
@@ -135,12 +140,4 @@ func remove(slice []int, index int) []int {
 	} else {
 		return slice
 	}
-}
-
-func toInt(val string) int {
-	num, err := strconv.ParseInt(val, 10, 0)
-	if err != nil {
-		log.Fatalf("Error converting value %s to uint32: %v.", val, err)
-	}
-	return int(num)
 }

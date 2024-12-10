@@ -5,9 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 	"strings"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
 
 type rule struct {
@@ -55,11 +55,7 @@ func main() {
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -91,7 +87,7 @@ func main() {
 				after:  toInt(fields[1]),
 			})
 		} else {
-			fields := toIntSlice(strings.Split(line, ","))
+			fields := utils.ToIntSlice(strings.Split(line, ","))
 			updates = append(updates, update{
 				pages: fields,
 				safe:  false,
@@ -125,11 +121,11 @@ func main() {
 		} else {
 			vPrint("Ordering update %v ...\n", update.pages)
 			update.Order(rules)
-			// vPrint("Update %v reordered to %v\n", old.pages, update.pages)
+			vPrint("Update %v reordered to %v\n", old.pages, update.pages)
 			res2 += update.getMiddlePage()
 		}
 		// vPrint("\n\n")
-		fmt.Printf("Done update %v\n\n", update)
+		vPrint("Done update %v\n\n", update)
 	}
 
 	// Print result
@@ -200,20 +196,4 @@ func permutations(arr []int) [][]int {
 	}
 	helper(arr, len(arr))
 	return res
-}
-
-func toIntSlice(slice []string) []int {
-	ints := make([]int, len(slice))
-	for i, s := range slice {
-		ints[i] = toInt(s)
-	}
-	return ints
-}
-
-func toInt(val string) int {
-	num, err := strconv.ParseInt(val, 10, 0)
-	if err != nil {
-		log.Fatalf("Error converting value %s to uint32: %v.", val, err)
-	}
-	return int(num)
 }

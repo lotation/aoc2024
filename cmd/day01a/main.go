@@ -5,23 +5,28 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"sort"
-	"strconv"
 	"strings"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
+
+var verbose bool = true
+
+func vPrint(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
 
 func main() {
 	var inputfile string
 	flag.StringVar(&inputfile, "input", "input-01a.txt", "path to file containing current day input")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -37,8 +42,8 @@ func main() {
 		fields := strings.Fields(line)
 
 		// Convert values to uint32 and save
-		left = append(left, toInt(fields[0]))
-		right = append(right, toInt(fields[1]))
+		left = append(left, utils.ToInt(fields[0]))
+		right = append(right, utils.ToInt(fields[1]))
 	}
 
 	if len(left) != len(right) {
@@ -57,12 +62,4 @@ func main() {
 
 	// Print result
 	fmt.Printf("Difference: %d\n", diff)
-}
-
-func toInt(val string) int {
-	num, err := strconv.ParseInt(val, 10, 0)
-	if err != nil {
-		log.Fatalf("Error converting value %s to uint32: %v.", val, err)
-	}
-	return int(num)
 }

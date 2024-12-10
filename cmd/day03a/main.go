@@ -5,22 +5,26 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
-	"strconv"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
 
+var verbose bool = true
+
+func vPrint(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
 func main() {
 	var inputfile string
 	flag.StringVar(&inputfile, "input", "input.txt", "path to file containing current day input")
+	flag.BoolVar(&verbose, "verbose", true, "enable verbose logging")
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -37,7 +41,7 @@ func main() {
 		re := regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
 		results := re.FindAllStringSubmatch(line, -1)
 		for _, elem := range results {
-			//fmt.Printf("%v\n", elem[1:])
+			vPrint("%v\n", elem[1:])
 			res += mul(elem[1:])
 		}
 	}
@@ -47,13 +51,5 @@ func main() {
 }
 
 func mul(str []string) int {
-	return toInt(str[0]) * toInt(str[1])
-}
-
-func toInt(val string) int {
-	num, err := strconv.ParseInt(val, 10, 0)
-	if err != nil {
-		log.Fatalf("Error converting value %s to uint32: %v.", val, err)
-	}
-	return int(num)
+	return utils.ToInt(str[0]) * utils.ToInt(str[1])
 }

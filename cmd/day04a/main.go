@@ -5,12 +5,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
+
+	"github.com/lotation/aoc2024/internal/utils"
 )
 
 const word string = "XMAS"
 
-var verbose = true
+var verbose bool = true
+
+func vPrint(format string, args ...interface{}) {
+	if verbose {
+		fmt.Printf(format, args...)
+	}
+}
 
 func main() {
 	var inputfile string
@@ -19,11 +26,7 @@ func main() {
 	flag.Parse()
 
 	// Open input file
-	fp, err := os.Open(inputfile)
-	if err != nil {
-		log.Fatalf("Error opening input file %s: %v", inputfile, err)
-		return
-	}
+	fp := utils.Fopen(inputfile)
 	defer func() {
 		if err := fp.Close(); err != nil {
 			log.Panic(err)
@@ -62,7 +65,7 @@ func main() {
 	// Start looking for word XMAS
 	for i := 0; i < len(table); i++ {
 		for j := 0; j < len(table[i]); j++ {
-			//fmt.Printf("%c ", table[i][j])
+			vPrint("%c ", table[i][j])
 
 			// Check if start of the word
 			if table[i][j] == 'X' { // word[0]
@@ -72,14 +75,12 @@ func main() {
 						count++ // word found in table
 					}
 				}
-				if verbose {
-					fmt.Println()
-				}
+				vPrint("\n")
 			}
 		}
-		//fmt.Println()
+		vPrint("\n")
 	}
-	// fmt.Println()
+	vPrint("\n")
 
 	// Print result
 	fmt.Printf("Result: %d\n", count)
@@ -157,14 +158,6 @@ func checkLeftUp(word string, table []string, i int, j int) bool {
 	return s == word
 }
 
-// func rev(str string) string {
-// 	runes := []rune(str)
-// 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
-// 		runes[i], runes[j] = runes[j], runes[i]
-// 	}
-// 	return string(runes)
-// }
-
 func rightSubstring(table []string, i, j int) string {
 	var result []rune
 	for k := 0; k < len(word); k++ {
@@ -210,13 +203,6 @@ func upSubstring(table []string, i, j int) string {
 }
 
 func rightDownSubstring(table []string, i, j int) string {
-	// var result []rune
-	// for i < len(table) && j < len(table[0]) {
-	// 	result = append(result, rune(table[i][j]))
-	// 	i++
-	// 	j++
-	// }
-	// return string(result)
 	var result []rune
 	for k := 0; k < len(word); k++ {
 		if i < len(table) && j < len(table[0]) {
@@ -253,13 +239,6 @@ func leftDownSubstring(table []string, i, j int) string {
 }
 
 func leftUpSubstring(table []string, i, j int) string {
-	// var result []rune
-	// for i >= 0 && j >= 0 {
-	// 	result = append(result, rune(table[i][j]))
-	// 	i--
-	// 	j--
-	// }
-	// return string(result)
 	var result []rune
 	for k := 0; k < len(word); k++ {
 		if i >= 0 && j >= 0 {
@@ -272,7 +251,5 @@ func leftUpSubstring(table []string, i, j int) string {
 }
 
 func logAction(action string, i, j int, substr string, cond bool) {
-	if verbose {
-		fmt.Printf("[%d,%d] %-10s  %s  {%t}\n", i, j, action, substr, cond)
-	}
+	vPrint("[%d,%d] %-10s  %s  {%t}\n", i, j, action, substr, cond)
 }
