@@ -11,11 +11,6 @@ func Fopen(filepath string) *os.File {
 	if err != nil {
 		log.Fatalf("Error opening input file %s: %v", filepath, err)
 	}
-	defer func() {
-		if err := fp.Close(); err != nil {
-			log.Panic(err)
-		}
-	}()
 	return fp
 }
 
