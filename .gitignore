@@ -3,3 +3,6 @@
 
 # used for notes or old code
 **/.lol.txt
+
+# asciinema cast files
+**/*.cast
